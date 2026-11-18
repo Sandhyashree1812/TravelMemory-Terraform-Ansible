@@ -103,12 +103,6 @@ Using a two-tier EC2 architecture, using one public EC2 instance for the applica
 
 2. Architecture explanation:
 
-<img width="558" height="482" alt="image" src="https://github.com/user-attachments/assets/50ad389b-f1fc-40f3-a0da-93413948dfe2" /> 
-
-<img width="539" height="137" alt="image" src="https://github.com/user-attachments/assets/9b6d55e1-106c-4eee-837b-b0d29177f2f2" />
-
----------------------------- 
-
 Why this architecture?
 Component	Why are we using it?
 . VPC	Creates an isolated AWS network
@@ -372,6 +366,8 @@ What does it do?
 - Configures packages that were unpacked but not configured.
 - Repairs the package manager's pending state.
 
+  <img width="806" height="229" alt="image" src="https://github.com/user-attachments/assets/c19c7cf4-ff7f-4acb-8a23-ef05c2431430" /> 
+
 Step 2 – Update package information
 Run: sudo apt-get update
 
@@ -384,41 +380,82 @@ Run: sudo apt-get install -y gnupg software-properties-common wget
 <img width="810" height="361" alt="image" src="https://github.com/user-attachments/assets/2485d7b2-5b36-4086-abf2-f67234a5d7ce" />
 
 
-<img width="806" height="229" alt="image" src="https://github.com/user-attachments/assets/c19c7cf4-ff7f-4acb-8a23-ef05c2431430" /> 
+
 
 Step 4 – Verify package manager health
 Run: sudo apt-get check
 
-<img width="415" height="81" alt="image" src="https://github.com/user-attachments/assets/e8f92967-f498-4029-965d-a63b10233f30" />
+<img width="415" height="81" alt="image" src="https://github.com/user-attachments/assets/e8f92967-f498-4029-965d-a63b10233f30" /> 
+
+----------------------------- 
+
+Step 1 – Update Ubuntu packages
+Run:
+sudo apt-get update 
+
+<img width="674" height="158" alt="image" src="https://github.com/user-attachments/assets/38c383d5-3ccc-4103-a4ff-dd78fb694a82" />
+
+--------------------------------------- 
 
 3. Add HashiCorp GPG key
+Copy the below code and run:
 wget -O- https://apt.releases.hashicorp.com/gpg | \
 gpg --dearmor | \
 sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
 
+<img width="880" height="239" alt="image" src="https://github.com/user-attachments/assets/57f1df81-de6b-4a80-bee0-f452e26d8343" />
 
-4. Add the official repository
+--------------------------------- 
+
+5. Add the official repository
+
+ Run:  
 echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(. /etc/os-release && echo "$VERSION_CODENAME") main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
 
 
-5. Update and install Terraform
-sudo apt-get update
+6. Update and install Terraform
+   Run:sudo apt-get update
 
-sudo apt-get install terraform -y
+<img width="886" height="236" alt="image" src="https://github.com/user-attachments/assets/0cfe4b98-b62e-43c0-aca2-35b3e2d01ded" />
 
+Run:sudo apt-get install terraform -y
 
-6. Verify installation
+<img width="864" height="337" alt="image" src="https://github.com/user-attachments/assets/36a3add7-9cf7-4d82-bb61-fbd2858b1e4b" />
+
+7. Verify installation
 terraform --version
 
+<img width="429" height="81" alt="image" src="https://github.com/user-attachments/assets/f9d753aa-78dc-496f-bbe2-6c57ac314706" />
 
 
+Phase 1 – Step 2: Verify AWS authentication
+Now we need to verify that our local machine can communicate with the correct AWS account.
+
+1. Check AWS configuration
+Execute:
+Run: aws configure list
+
+<img width="618" height="104" alt="image" src="https://github.com/user-attachments/assets/e131aa46-1399-469c-a6a8-df71ea3afa81" />
 
 
+3. Verify AWS identity
+Execute:
+aws sts get-caller-identity
+
+<img width="608" height="95" alt="image" src="https://github.com/user-attachments/assets/981d278e-6c2b-4890-a2cd-3df9ecea9272" />
 
 
+Run: aws configure get region
+<img width="455" height="29" alt="image" src="https://github.com/user-attachments/assets/3837be89-712f-4232-ad82-c9529892f862" />
 
 
+3. Check your existing project directories
+Now let's inspect your home directory.
 
+Execute:
+cd ~
+
+ls -la
 
 
 
