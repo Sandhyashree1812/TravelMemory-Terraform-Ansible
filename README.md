@@ -12,6 +12,7 @@ Imagine a user opens our application in a browser.
 5. Express connects to MongoDB on a separate EC2 instance in the private subnet.
 6. MongoDB stores or retrieves the requested information.
 7. The backend returns the response to the frontend.
+   
 The important DevOps concept here is that infrastructure creation and software configuration are automated separately.
 - Terraform creates the infrastructure.
 - Ansible configures the infrastructure.
@@ -26,8 +27,11 @@ Architecture explanation:
 
 
 
-<img width="558" height="482" alt="image" src="https://github.com/user-attachments/assets/50ad389b-f1fc-40f3-a0da-93413948dfe2" />
+<img width="558" height="482" alt="image" src="https://github.com/user-attachments/assets/50ad389b-f1fc-40f3-a0da-93413948dfe2" /> 
+
 <img width="539" height="137" alt="image" src="https://github.com/user-attachments/assets/9b6d55e1-106c-4eee-837b-b0d29177f2f2" />
+
+---------------------------- 
 
 Why this architecture?
 Component	Why are we using it?
@@ -47,26 +51,26 @@ Important security decision: MongoDB should never be publicly accessible. Port 2
 -------------------------------------- 
 
 3. Tools we will use and why
-These are the tools I would choose for this project.
-Tool	Purpose	Where we use it
-AWS	Cloud platform	Entire deployment
-AWS CLI	Authenticate and manage AWS	Local machine
-Terraform	Infrastructure as Code	Create VPC, EC2, networking
-Ansible	Configuration management	Install and configure software
-Ubuntu 24.04	Server operating system	Both EC2 instances
-Node.js	Backend runtime	Web EC2
-React	Frontend	Web EC2
-Express.js	REST API	Web EC2
-MongoDB	Database	Private EC2
-Nginx	Web server and reverse proxy	Web EC2
-Git	Version control	Local machine
-GitHub	Store deliverables	Repository
-SSH	Secure server access	Local machine to EC2
-UFW	Host-level firewall	EC2 instances
+These are the tools we chose for this project.
+Tool	                        Purpose	                              Where we use it
+AWS	                  Cloud platform	                              Entire deployment
+AWS CLI               	Authenticate and manage AWS	               Local machine
+Terraform	            Infrastructure as Code	                     Create VPC, EC2, networking
+Ansible	               Configuration management	                  Install and configure software
+Ubuntu 24.04	         Server operating system                     	Both EC2 instances
+Node.js               	Backend runtime	                           Web EC2
+React                  	Frontend	                                    Web EC2
+Express.js	            REST API	                                    Web EC2
+MongoDB	               Database	                                    Private EC2
+Nginx	                  Web server and reverse proxy	               Web EC2
+Git	                  Version control	                           Local machine
+GitHub	               Store deliverables	                        Repository
+SSH	                  Secure server access	                        Local machine to EC2
+UFW	                  Host-level firewall	                        EC2 instances
+
+---------------------------------------------------- 
 
 Why Terraform and Ansible together?
-This is an important interview question.
-
 Terraform answers: What infrastructure should exist?
 
 For example:
@@ -76,6 +80,7 @@ For example:
 - Create EC2 instances.
 - Create an IAM role.
 - Allocate a NAT Gateway.
+
 Ansible answers: What should be installed and configured on that infrastructure?
 
 For example:
@@ -85,12 +90,15 @@ For example:
 - Install NPM dependencies.
 - Configure environment variables.
 - Start application services.
+- 
 This separation is one of the main learning outcomes of the assignment.
 
 ----------------------------------------------------------------- 
 
 4. Project execution – 8 phases
-We will use the following execution sequence.
+
+We will use the following execution sequence:
+
 1. Phase 1 – Local setup and repository preparation
    
    AWS CLI, Terraform, Ansible, Git and application inspection.
@@ -122,12 +130,81 @@ We will use the following execution sequence.
 
 1. Project architecture
 
+1.1 Overall architecture
+
+
+<img width="566" height="530" alt="image" src="https://github.com/user-attachments/assets/963b227b-27b6-4550-abd8-ac4474def12b" />
+
+
+<img width="581" height="481" alt="image" src="https://github.com/user-attachments/assets/bbb59961-21ea-447b-a8b5-99e6b70e2341" />
 
 
 
+1.2 Architecture in simple text diagram form
 
 
+                  END USER
+                     |
+                     |
+               Web Browser
+                     |
+                     | HTTP / HTTPS
+                     |
+              INTERNET GATEWAY
+                     |
+                     |
+       +------------- AWS VPC -------------+
+       |                                   |
+       |         10.0.0.0/16               |
+       |                                   |
+       |   PUBLIC SUBNET                   |
+       |   10.0.1.0/24                     |
+       |                                   |
+       |   +---------------------------+   |
+       |   | EC2 - WEB SERVER          |   |
+       |   | Ubuntu 24.04               |   |
+       |   |                           |   |
+       |   | Nginx                     |   |
+       |   | React Frontend            |   |
+       |   | Node.js + Express         |   |
+       |   | PM2                       |   |
+       |   +---------------------------+   |
+       |                |                  |
+       |                | MongoDB          |
+       |                | Port 27017       |
+       |                |                  |
+       |   PRIVATE SUBNET                  |
+       |   10.0.2.0/24                     |
+       |                |                  |
+       |   +---------------------------+   |
+       |   | EC2 - DATABASE SERVER     |   |
+       |   | Ubuntu 24.04               |   |
+       |   |                           |   |
+       |   | MongoDB                   |   |
+       |   | Database: travelmemory    |   |
+       |   +---------------------------+   |
+       |                                   |
+       |   NAT GATEWAY                     |
+       |   Private outbound connectivity   |
+       |                                   |
+       +-----------------------------------+
 
+          INFRASTRUCTURE AUTOMATION
+
+             Terraform
+                 |
+                 v
+          AWS Infrastructure
+
+             Ansible
+                 |
+                 v
+          Server Configuration
+                 |
+                 v
+          Application Deployment
+
+================================================== 
 
 
 
