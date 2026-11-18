@@ -1,132 +1,6 @@
 Project: Travel Memory – Automated MERN Application Deployment on AWS using Terraform and Ansible
 
-
------------------------------------------------------------------------------------ 
-
-What are we trying to achieve?
-Imagine a user opens our application in a browser.
-1. The user accesses the application using the public IP of the web server.
-2. The React frontend loads.
-3. React communicates with the Express backend through HTTP API requests.
-4. Express processes those requests.
-5. Express connects to MongoDB on a separate EC2 instance in the private subnet.
-6. MongoDB stores or retrieves the requested information.
-7. The backend returns the response to the frontend.
-   
-The important DevOps concept here is that infrastructure creation and software configuration are automated separately.
-- Terraform creates the infrastructure.
-- Ansible configures the infrastructure.
-- The application runs on the configured infrastructure.
-
-- ---------------------------------------------------------------- 
-AWS architecture:
-Using a two-tier EC2 architecture, using one public EC2 instance for the application and one private EC2 instance for MongoDB.
--------------------------------------------------------------------- 
-
-Architecture explanation:
-
-
-
-<img width="558" height="482" alt="image" src="https://github.com/user-attachments/assets/50ad389b-f1fc-40f3-a0da-93413948dfe2" /> 
-
-<img width="539" height="137" alt="image" src="https://github.com/user-attachments/assets/9b6d55e1-106c-4eee-837b-b0d29177f2f2" />
-
----------------------------- 
-
-Why this architecture?
-Component	Why are we using it?
-VPC	Creates an isolated AWS network
-Public subnet	Hosts the application server
-Private subnet	Protects the database server
-Internet Gateway	Enables public subnet internet connectivity
-NAT Gateway	Allows private instances to download updates
-EC2	Provides virtual machines to run the application and database
-Security Groups	Control network access
-IAM Role	Gives EC2 controlled AWS permissions
-Terraform	Automates infrastructure provisioning
-Ansible	Automates server configuration
-
-Important security decision: MongoDB should never be publicly accessible. Port 27017 should only accept connections from the web server's security group.
-
--------------------------------------- 
-
-3. Tools we will use and why
-These are the tools we chose for this project.
-Tool	                        Purpose	                              Where we use it
-AWS	                  Cloud platform	                              Entire deployment
-AWS CLI               	Authenticate and manage AWS	               Local machine
-Terraform	            Infrastructure as Code	                     Create VPC, EC2, networking
-Ansible	               Configuration management	                  Install and configure software
-Ubuntu 24.04	         Server operating system                     	Both EC2 instances
-Node.js               	Backend runtime	                           Web EC2
-React                  	Frontend	                                    Web EC2
-Express.js	            REST API	                                    Web EC2
-MongoDB	               Database	                                    Private EC2
-Nginx	                  Web server and reverse proxy	               Web EC2
-Git	                  Version control	                           Local machine
-GitHub	               Store deliverables	                        Repository
-SSH	                  Secure server access	                        Local machine to EC2
-UFW	                  Host-level firewall	                        EC2 instances
-
----------------------------------------------------- 
-
-Why Terraform and Ansible together?
-Terraform answers: What infrastructure should exist?
-
-For example:
-- Create a VPC.
-- Create subnets.
-- Create security groups.
-- Create EC2 instances.
-- Create an IAM role.
-- Allocate a NAT Gateway.
-
-Ansible answers: What should be installed and configured on that infrastructure?
-
-For example:
-- Install Node.js.
-- Install MongoDB.
-- Clone GitHub repository.
-- Install NPM dependencies.
-- Configure environment variables.
-- Start application services.
-- 
-This separation is one of the main learning outcomes of the assignment.
-
------------------------------------------------------------------ 
-
-4. Project execution – 8 phases
-
-We will use the following execution sequence:
-
-1. Phase 1 – Local setup and repository preparation
-   
-   AWS CLI, Terraform, Ansible, Git and application inspection.
-2. Phase 2 – Terraform project setup
-   
-   AWS provider, variables, networking and infrastructure code.
-3. Phase 3 – AWS infrastructure provisioning
-   
-   VPC, subnets, gateways, route tables, security groups, IAM and EC2.
-4. Phase 4 – Ansible configuration
-   
-   Inventory, SSH connectivity and reusable playbooks.
-5. Phase 5 – Database server configuration
-   
-   MongoDB installation, authentication, database and network security.
-6. Phase 6 – MERN application deployment
-   
-   Node.js, React build, Express backend, Nginx and PM2.
-7. Phase 7 – Testing and security verification
-   
-   Frontend, backend, database connectivity and security checks.
-8. Phase 8 – Documentation and submission
-   
-   GitHub repository, architecture diagram, report and screenshots.
-
-   -----------------------------------
-
-   
+=================================================================================================  
 
 1. Project architecture
 
@@ -139,8 +13,7 @@ We will use the following execution sequence:
 <img width="581" height="481" alt="image" src="https://github.com/user-attachments/assets/bbb59961-21ea-447b-a8b5-99e6b70e2341" />
 
 
-
-1.2 Architecture in simple text diagram form
+1.2 Architecture in simple diagram form
 
 
                   END USER
@@ -206,7 +79,336 @@ We will use the following execution sequence:
 
 ================================================== 
 
+1.3 How the application works
+Let's understand the actual request flow.
 
+imagine a user opens our application in a browser.
+1. The user accesses the application, Travelmemory using the public IP of the web server.
+2. The React frontend loads.
+3. React communicates with the Express backend through HTTP API requests.
+4. Express processes those requests.
+5. Express connects to MongoDB on a separate EC2 instance in the private subnet.
+6. MongoDB stores or retrieves the requested information.
+7. The backend returns the response to the frontend.
+   
+The important DevOps concept here is that infrastructure creation and software configuration are automated separately.
+- Terraform creates the infrastructure.
+- Ansible configures the infrastructure.
+- The application runs on the configured infrastructure.
+
+- ---------------------------------------------------------------- 
+AWS architecture:
+Using a two-tier EC2 architecture, using one public EC2 instance for the application and one private EC2 instance for MongoDB.
+-------------------------------------------------------------------- 
+
+2. Architecture explanation:
+
+<img width="558" height="482" alt="image" src="https://github.com/user-attachments/assets/50ad389b-f1fc-40f3-a0da-93413948dfe2" /> 
+
+<img width="539" height="137" alt="image" src="https://github.com/user-attachments/assets/9b6d55e1-106c-4eee-837b-b0d29177f2f2" />
+
+---------------------------- 
+
+Why this architecture?
+Component	Why are we using it?
+. VPC	Creates an isolated AWS network
+. Public subnet	Hosts the application server
+. Private subnet	Protects the database server
+. Internet Gateway	Enables public subnet internet connectivity
+. NAT Gateway	Allows private instances to download updates
+. EC2	Provides virtual machines to run the application and database
+. Security Groups	Control network access
+. IAM Role	Gives EC2 controlled AWS permissions
+. Terraform	Automates infrastructure provisioning
+. Ansible	Automates server configuration
+
+Important security decision: MongoDB should never be publicly accessible. Port 27017 should only accept connections from the web server's security group.
+
+-------------------------------------- 
+
+3. Tools we will use and why
+These are the tools we chose for this project.
+Tool	                        Purpose	                              Where we use it
+AWS	                  Cloud platform	                              Entire deployment
+AWS CLI               	Authenticate and manage AWS	               Local machine
+Terraform	            Infrastructure as Code	                     Create VPC, EC2, networking
+Ansible	               Configuration management	                  Install and configure software
+Ubuntu 24.04	         Server operating system                     	Both EC2 instances
+Node.js               	Backend runtime	                           Web EC2
+React                  	Frontend	                                    Web EC2
+Express.js	            REST API	                                    Web EC2
+MongoDB	               Database	                                    Private EC2
+Nginx	                  Web server and reverse proxy	               Web EC2
+Git	                  Version control	                           Local machine
+GitHub	               Store deliverables	                        Repository
+SSH	                  Secure server access	                        Local machine to EC2
+UFW	                  Host-level firewall	                        EC2 instances
+
+---------------------------------------------------- 
+
+Why Terraform and Ansible together?
+Terraform answers: What infrastructure should exist?
+
+For example:
+- Create a VPC.
+- Create subnets.
+- Create security groups.
+- Create EC2 instances.
+- Create an IAM role.
+- Allocate a NAT Gateway.
+
+Ansible answers: What should be installed and configured on that infrastructure?
+
+For example:
+- Install Node.js.
+- Install MongoDB.
+- Clone GitHub repository.
+- Install NPM dependencies.
+- Configure environment variables.
+- Start application services.
+- 
+This separation is one of the main learning outcomes of the assignment.
+
+-----------------------------------------------------------------  
+
+
+4. Project phases 
+We will divide the assignment into these eight phases.
+
+Project execution plan
+8 phases
+
+1. Phase 1 – Local environment and project setup
+   Starting now
+   - Understand the application repository.
+   - Prepare the local working directory.
+   - Verify AWS CLI.
+   - Verify Terraform.
+   - Verify Ansible.
+   - Configure AWS authentication.
+2. Phase 2 – Terraform configuration
+   - Initialize Terraform.
+   - Configure AWS provider.
+   - Create variables and resource files.
+   - Prepare infrastructure configuration.
+3. Phase 3 – AWS infrastructure provisioning
+   - Create VPC.
+   - Create public and private subnets.
+   - Create Internet Gateway and NAT Gateway.
+   - Create route tables.
+   - Create security groups.
+   - Create IAM roles.
+   - Launch two EC2 instances.
+4. Phase 4 – Ansible configuration
+   - Configure inventory.
+   - Configure SSH.
+   - Establish web and database connectivity.
+   - Test Ansible ping.
+5. Phase 5 – MongoDB deployment
+   - Install MongoDB.
+   - Configure database networking.
+   - Enable authentication.
+   - Create database and database user.
+6. Phase 6 – MERN application deployment
+   - Install Node.js and NPM.
+   - Clone TravelMemory.
+   - Install backend dependencies.
+   - Configure environment variables.
+   - Build React frontend.
+   - Configure Nginx.
+   - Start backend with PM2.
+7. Phase 7 – Testing and security
+   - Test frontend.
+   - Test backend APIs.
+   - Test MongoDB connectivity.
+   - Verify network security.
+   - Verify application persistence.
+8. Phase 8 – Documentation and submission
+   - Architecture documentation.
+   - Terraform and Ansible code.
+   - Screenshots.
+   - README.
+   - Implementation report.
+   - GitHub submission.
+
+
+   -----------------------------------
+=========================================================================== 
+
+4. Phase 1 – Local environment and project setup
+
+Objective of Phase 1
+Before creating AWS infrastructure, we need to prepare our local development environment.
+
+Our local machine will be the Terraform workstation and Ansible control node.
+
+We will use your existing setup:
+- Windows laptop
+- WSL2 – Ubuntu 24.04
+- VS Code
+- PowerShell / Ubuntu terminal
+- AWS account
+- GitHub
+We do not need Docker for this assignment. We will deploy directly on EC2 using Terraform and Ansible.
+
+========================================================================= 
+
+Step 1.1 – Understand the TravelMemory application
+Before deploying an application, a DevOps Engineer should inspect the source code.
+
+The repository has this structure: 
+
+TravelMemory/
+│
+├── backend/
+│   ├── index.js
+│   ├── package.json
+│   └── .env.example
+│
+├── frontend/
+│   ├── package.json
+│   ├── public/
+│   └── src/
+│
+├── README.md
+├── .gitignore
+└── azure-pipelines.yml
+
+============================ 
+
+Let's understand what each directory does.
+File/folder	                                          Purpose
+backend	                                             Express and Node.js application
+backend/index.js	                                    Backend application entry point
+backend/package.json	                                 Backend dependencies and scripts
+frontend	                                             React application
+frontend/src	                                       React components and source code
+frontend/package.json	                              Frontend dependencies
+README.md	                                          Application instructions
+
+Important application details we have identified:
+Configuration	                                       Value
+Backend port	                                       3001
+Backend database variable	                           MONGO_URI
+Frontend backend URL variable	                        REACT_APP_BACKEND_URL
+Backend health endpoint	                              /health
+Travel memories API	                                 /trip
+Image uploads	                                       /uploads/
+
+These details will help us configure Ansible correctly later. 
+
+========================================================== 
+
+
+Step 1.2 – Open Ubuntu WSL
+Open VS Code.
+
+Then open your Ubuntu terminal.
+
+You can also open Ubuntu directly from Windows PowerShell:
+
+Run:
+wsl
+lsb_release -a
+pwd
+cd ~
+pwd
+
+<img width="571" height="303" alt="image" src="https://github.com/user-attachments/assets/a0b43e4c-7673-4e10-9d42-78f851d75bcc" />
+
+---------------------------------------  
+
+Step 1.3 – Verify the required tools
+We need five essential tools.
+
+Run these commands one by one:
+
+1. Git
+  Run:
+git --version
+Purpose: Clone the GitHub repository and manage project changes.
+
+3. AWS CLI
+aws --version
+Purpose: Connect our local machine to AWS and verify our AWS identity.
+
+3. Terraform
+terraform --version
+Purpose: Create AWS infrastructure using configuration files.
+
+4. Ansible
+ansible --version
+Purpose: Configure the EC2 instances.
+
+5. SSH
+ssh -V
+Purpose: Connect securely to EC2 instances.
+
+<img width="880" height="341" alt="image" src="https://github.com/user-attachments/assets/adcaeec5-d4d1-4964-8de1-a56167a99692" />
+
+---------------------------------- 
+
+2. Step 1 – Install Terraform
+We will install Terraform using HashiCorp's official Ubuntu package repository.
+
+Why? Terraform is the main tool we will use to create our AWS infrastructure.
+
+Execute these commands in Ubuntu WSL, one at a time.
+
+1. Update package information
+   Run: sudo apt-get update
+
+   <img width="725" height="562" alt="image" src="https://github.com/user-attachments/assets/92630a0c-c343-419b-a83e-7d3e8e03f1cc" />
+
+2. Install prerequisites
+
+We need to repair the package manager before installing Terraform.
+
+Step 1 – Repair dpkg
+Run this command in your Ubuntu WSL terminal:
+sudo dpkg --configure -a
+What does it do?
+- Completes previously interrupted package installations.
+- Configures packages that were unpacked but not configured.
+- Repairs the package manager's pending state.
+
+Step 2 – Update package information
+Run: sudo apt-get update
+
+<img width="599" height="134" alt="image" src="https://github.com/user-attachments/assets/d7c8de24-a150-4238-ab37-143b34f14aac" />
+
+
+Step 3 – Install prerequisites
+Run: sudo apt-get install -y gnupg software-properties-common wget
+
+<img width="810" height="361" alt="image" src="https://github.com/user-attachments/assets/2485d7b2-5b36-4086-abf2-f67234a5d7ce" />
+
+
+<img width="806" height="229" alt="image" src="https://github.com/user-attachments/assets/c19c7cf4-ff7f-4acb-8a23-ef05c2431430" /> 
+
+Step 4 – Verify package manager health
+Run: sudo apt-get check
+
+<img width="415" height="81" alt="image" src="https://github.com/user-attachments/assets/e8f92967-f498-4029-965d-a63b10233f30" />
+
+3. Add HashiCorp GPG key
+wget -O- https://apt.releases.hashicorp.com/gpg | \
+gpg --dearmor | \
+sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
+
+
+4. Add the official repository
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(. /etc/os-release && echo "$VERSION_CODENAME") main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+
+
+5. Update and install Terraform
+sudo apt-get update
+
+sudo apt-get install terraform -y
+
+
+6. Verify installation
+terraform --version
 
 
 
