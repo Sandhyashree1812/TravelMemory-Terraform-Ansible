@@ -449,26 +449,228 @@ Run: aws configure get region
 <img width="455" height="29" alt="image" src="https://github.com/user-attachments/assets/3837be89-712f-4232-ad82-c9529892f862" />
 
 
-3. Check your existing project directories
+4. Check your existing project directories
 Now let's inspect your home directory.
 
 Execute:
-cd ~
-
 ls -la
+git remote -v
 
 
+<img width="546" height="182" alt="image" src="https://github.com/user-attachments/assets/319a6b87-6f91-4a68-9bf2-640d3df10959" />
+
+5. Check the current project files
+Run:
+git status
+find backend frontend -maxdepth 2 -type f | sort
+
+--------------- 
+Notes:
+Why are we doing this?
+- git status checks whether there are uncommitted changes.
+- find shows the application files so we can confirm whether the MERN source code is already present.
+
+  o/p shows that project currently contains:
+- Backend: Node.js, Express, MongoDB
+- Frontend: React
+- GitHub: Connected to the TravelMemory-Terraform-Ansible repository
+-------------------------------
+
+Step 6. Review the changes
+Run:
+git diff --stat
+
+<img width="591" height="385" alt="image" src="https://github.com/user-attachments/assets/03a08429-1f42-4b2b-998b-aa9da506a7db" />
 
 
+It will show how many files have changed and the approximate size of those changes.
+
+------------- 
 
 
+Step 7. Check whether the actual code changed
+
+1. Check the real changes, ignoring line-ending differences:
+Run:
+git -c core.pager=cat diff --ignore-space-at-eol --stat
+
+2. Check the important configuration files:
+ Run:
+git -c core.pager=cat diff --ignore-space-at-eol -- backend/package.json frontend/package.json backend/.env.example frontend/.env.example
+
+<img width="802" height="64" alt="image" src="https://github.com/user-attachments/assets/0d313dce-d9a8-4b32-95ff-cf996e3cd97e" /> 
+
+Step 8. Protect the current repository
+Before creating infrastructure files, let's ensure Git is configured to handle Windows and Linux line endings consistently.
+
+Run:
+git config core.autocrlf input
+git config core.safecrlf warn
+git status --short
+
+<img width="493" height="53" alt="image" src="https://github.com/user-attachments/assets/6333f9af-7269-4f8a-b805-23b522506cff" />
+
+----------------- 
+
+Notes:
+our git status --short returned no output. That means:
+- Your local repository is clean.
+- Your application files match the committed GitHub version.
+- Git line-ending handling is configured.
+- We can safely start adding our DevOps implementation.
+
+----------------------------------------------------------- 
+========================================================================================= 
+
+Phase 2 – Terraform project setup 
+
+=======================================================================================
+
+Our next objective is to create the Terraform and Ansible directory structure.
 
 
+Step 1 – Create project directories
+Run:
+mkdir -p terraform ansible/playbooks ansible/templates ansible/group_vars docs screenshots
+
+--------------------- 
+Notes:
+
+This creates:
+Directory	Purpose
+terraform/	AWS infrastructure definitions
+ansible/playbooks/	Server configuration and deployment
+ansible/templates/	Nginx and application configuration templates
+ansible/group_vars/	Variables for server groups
+docs/	Architecture and implementation report
+screenshots/	Assignment evidence 
+
+-------------------------------------------------- 
+
+Step 2 – Verify the structure
+Run:
+tree -L 2 -d
+
+<img width="736" height="71" alt="image" src="https://github.com/user-attachments/assets/b9e54961-7e2c-4c4f-9a2d-cd88da9869cd" />
 
 
+notes: as tree is not installed, use:  
+
+Run: 
+find . -maxdepth 2 -type d | sort 
 
 
+<img width="604" height="266" alt="image" src="https://github.com/user-attachments/assets/5bd369de-161b-4cc2-881f-efceb7825c65" />
 
+The directory structure has been created successfully.
+
+---------------------------------------------------- 
+
+. Terraform configuration
+--------------------------- 
+
+Step 2 – Create the AWS provider configuration
+
+-------------------------------------------------------
+
+Notes:
+Terraform needs an AWS provider to communicate with AWS and create resources such as VPCs, subnets, security groups, and EC2 instances.
+
+We'll use:
+- Cloud provider: AWS
+- Region: us-east-1
+- Provider: HashiCorp AWS
+- Credentials: our existing AWS CLI configuration
+
+---------------------------------------------------- 
+
+2.1 Create provider.tf
+
+Run:
+cd terraform
+nano provider.tf
+
+Paste this configuration:
+terraform {
+  required_version = ">= 1.5.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+
+
+Save the file:
+- Press Ctrl + O
+- Press Enter
+- Press Ctrl + X
+
+  ------------------------------
+
+  2.2 Create variables.tf
+Run:
+nano variables.tf
+
+Paste:
+variable "aws_region" {
+  description = "AWS region for deploying TravelMemory"
+  type        = string
+  default     = "us-east-1"
+}
+
+
+Save and exit. 
+
+--------------------------------------- 
+
+2.3 Initialize Terraform
+Run:
+terraform init
+
+<img width="485" height="257" alt="image" src="https://github.com/user-attachments/assets/986fc650-0e4e-405a-a10a-993b3c6c84d0" />
+
+
+Notes:
+This command:
+1. Initializes the Terraform working directory.
+2. Downloads the AWS provider plugin.
+3. Creates the .terraform directory.
+4. Creates or updates .terraform.lock.hcl to lock the provider version.
+No AWS infrastructure is created by terraform init.
+
+------------------------------------------------- 
+
+2.4 Verify the configuration
+After initialization, run:
+terraform validate
+
+<img width="549" height="62" alt="image" src="https://github.com/user-attachments/assets/3cb8d91a-1194-4be1-af12-c22e588daccf" />
+
+-------------------------------------------- 
+
+Notes:
+output confirms:
+- Terraform version is compatible.
+- AWS provider hashicorp/aws version 6.73.0 downloaded successfully.
+- .terraform.lock.hcl was created.
+- terraform validate returned Success! The configuration is valid.
+This means Terraform is ready to start defining AWS infrastructure.
+
+------------------------------------------ 
+================================================================================================================= 
+
+Phase 3 – Build AWS infrastructure 
+
+=============================================================================================================== 
+
+We'll build the infrastructure in small steps and validate each configuration.
 
 
 
